@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Upload File Shopee</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <div class="container" style="max-width: 500px; margin-top: 50px;">
+        <nav class="nav-back">
+            <a href="{{ url_for('master_data') }}"><i data-lucide="arrow-left"></i> Batal</a>
+        </nav>
+
+        <div class="card border-primary">
+            <h3 style="text-align: center;"><i data-lucide="file-up"></i> Tahap 1: Upload File</h3>
+            <p class="muted-text" style="text-align: center; font-size: 0.9rem;">Upload file CSV/Excel "Mass Update Data Media" dari Shopee.</p>
+            
+            <form action="{{ url_for('shopee_importer') }}" method="POST" enctype="multipart/form-data" style="margin-top: 20px;">
+                <div style="border: 2px dashed var(--border); padding: 30px; border-radius: 12px; text-align: center; background: #f8fafc;">
+                    <i data-lucide="file-spreadsheet" style="width: 40px; height: 40px; color: #10b981; margin-bottom: 10px;"></i><br>
+                    <input type="file" name="file_shopee" accept=".csv, .xlsx, .xls" required>
+                </div>
+                <button type="submit" class="btn-primary" style="width: 100%; margin-top: 20px; padding: 15px;">
+                    Lanjut ke Mapping <i data-lucide="chevron-right"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+    <script>lucide.createIcons();</script>
+</body>
+</html>

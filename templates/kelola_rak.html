@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Rak: {{ rak.nama_rak }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <div class="container">
+        <nav class="nav-back">
+            <a href="{{ url_for('list_rak') }}"><i data-lucide="arrow-left"></i> Kembali ke Daftar Semua Rak</a>
+        </nav>
+
+        <div class="header-section">
+            <div class="brand">
+                <h1><i data-lucide="layers"></i> Rak: {{ rak.nama_rak }}</h1>
+                <div class="location-path" style="margin-top: 5px;">
+                    <i data-lucide="warehouse"></i>
+                    <span>Gudang: <strong>{{ rak.gudang.nama_gudang }}</strong></span>
+                    <i data-lucide="chevron-right" class="path-sep"></i>
+                    <span>Kode Rak: <strong class="badge-code">{{ rak.kode_rak if rak.kode_rak else '-' }}</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-primary">
+            <h3><i data-lucide="plus-square"></i> Tambah Toples/Wadah Baru</h3>
+            <form action="/add_toples/{{ rak.id }}" method="POST" class="search-form">
+                <input type="text" name="nama_toples" placeholder="Contoh: Box Plastik A, Toples Kaca 1..." required>
+                <button type="submit" class="success-bg"><i data-lucide="save"></i> Simpan Wadah</button>
+            </form>
+        </div>
+
+        <h3 style="margin-top: 2rem; margin-bottom: 1rem;"><i data-lucide="container"></i> Daftar Wadah di Rak Ini</h3>
+        
+        <div class="jar-grid">
+            {% for t in rak.toples_list %}
+            <div class="jar-item" style="padding: 25px;">
+                <a href="/delete_toples/{{ t.id }}" class="delete-btn" 
+                   onclick="return confirm('Hapus toples {{ t.nama_toples }}? Semua barang di dalamnya akan kehilangan lokasi.')" 
+                   title="Hapus Wadah">
+                    <i data-lucide="x"></i>
+                </a>
+
+                <div class="jar-icon" style="margin-bottom: 15px;">
+                    <i data-lucide="container" style="width: 45px; height: 45px; color: var(--primary);"></i>
+                </div>
+
+                <h4 style="margin-bottom: 5px;">{{ t.nama_toples }}</h4>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 15px;">
+                    <i data-lucide="box" style="width: 12px; height: 12px;"></i> {{ t.barangs|length }} Item Barang
+                </p>
+
+                <a href="{{ url_for('kelola_toples', toples_id=t.id) }}" class="btn-primary" style="width: 100%; justify-content: center; font-size: 0.85rem;">
+                    Buka Isi <i data-lucide="arrow-right"></i>
+                </a>
+            </div>
+            {% else %}
+            <div class="card" style="grid-column: 1/-1; text-align: center; padding: 40px; border: 2px dashed var(--border); background: transparent; box-shadow: none;">
+                <i data-lucide="info" style="width: 40px; height: 40px; opacity: 0.2; margin-bottom: 10px;"></i>
+                <p class="muted-text">Belum ada toples/wadah di rak ini.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>

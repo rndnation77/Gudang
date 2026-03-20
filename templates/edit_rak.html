@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <div class="nav-back">
+        <a href="{{ url_for('master_data') }}"><i data-lucide="arrow-left"></i> Kembali ke Master Data</a>
+    </div>
+
+    <div class="card border-primary">
+        <h2>Edit Data Rak</h2>
+        <form action="{{ url_for('update_rak', id=rak.id) }}" method="POST">
+            <div style="flex: 1; display: flex; flex-direction: column; gap: 15px;">
+                <label>Nama Rak</label>
+                <input type="text" name="nama_rak" value="{{ rak.nama_rak }}" required>
+                
+                <label>Kode Rak</label>
+                <input type="text" name="kode_rak" value="{{ rak.kode_rak }}">
+                
+                <label>Lokasi Gudang</label>
+                <select name="gudang_id">
+                    {% for g in gudangs %}
+                    <option value="{{ g.id }}" {% if g.id == rak.gudang_id %}selected{% endif %}>
+                        {{ g.nama_gudang }}
+                    </option>
+                    {% endfor %}
+                </select>
+                
+                <div style="margin-top: 10px;">
+                    <button type="submit" class="btn-indigo">Simpan Perubahan</button>
+                    <a href="{{ url_for('delete_rak', id=rak.id) }}" 
+                       class="btn-reset" style="color: red;" 
+                       onclick="return confirm('Hapus rak ini?')">Hapus Rak</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

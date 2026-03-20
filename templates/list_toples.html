@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Semua Toples - Smart Warehouse</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <div class="container">
+        <nav class="nav-back">
+            <a href="{{ url_for('index') }}"><i data-lucide="arrow-left"></i> Kembali ke Dashboard</a>
+        </nav>
+
+        <div class="header-section">
+            <h1><i data-lucide="container"></i> Manajemen Semua Toples</h1>
+        </div>
+
+        <div class="card">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Nama Toples</th>
+                        <th>Posisi (Rak > Gudang)</th>
+                        <th>Isi Barang</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in toples_list %}
+                    <tr>
+                        <td><strong>{{ t.nama_toples }}</strong></td>
+                        <td class="muted-text">
+                            <small>{{ t.rak.nama_rak }} <i data-lucide="chevron-right" style="width:10px"></i> {{ t.rak.gudang.nama_gudang }}</small>
+                        </td>
+                        <td>
+                            <span class="badge-count">{{ t.barangs|length }} Barang</span>
+                        </td>
+                        <td>
+                            <div style="display: flex; gap: 8px;">
+                                <a href="{{ url_for('kelola_toples', toples_id=t.id) }}" class="btn-icon btn-primary-small" title="Lihat Isi">
+                                    <i data-lucide="eye"></i>
+                                </a>
+                                <a href="/delete_toples/{{ t.id }}" class="btn-icon delete-icon-btn" onclick="return confirm('Hapus toples ini?')" title="Hapus">
+                                    <i data-lucide="trash-2"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script>lucide.createIcons();</script>
+</body>
+</html>

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Mapping Kolom Shopee</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .map-group { display: flex; align-items: center; gap: 15px; background: #f1f5f9; padding: 15px; border-radius: 8px; margin-bottom: 10px; }
+        .map-group label { flex: 1; font-weight: 600; }
+        .map-group select { flex: 2; padding: 8px; border-radius: 5px; border: 1px solid #cbd5e1; }
+    </style>
+</head>
+<body>
+    <div class="container" style="max-width: 700px; margin-top: 30px;">
+        <div class="card border-primary">
+            <h3><i data-lucide="shuffle"></i> Tahap 2: Pemetaan Kolom</h3>
+            <p class="muted-text">Cocokkan kolom dari file kamu dengan sistem gudang.</p>
+
+            <form action="{{ url_for('process_import') }}" method="POST">
+                <div style="margin-bottom: 25px; padding: 15px; background: #fffbeb; border: 1px solid #fef3c7; border-radius: 8px;">
+                    <label style="display: block; font-weight: 700; margin-bottom: 10px;">Pilih Toples Tujuan (Massal):</label>
+                    <select name="toples_id" required style="width: 100%; padding: 10px;">
+                        {% for g in gudangs %}
+                            {% for r in g.raks %}
+                                {% for t in r.toples_list %}
+                                    <option value="{{ t.id }}">{{ g.nama_gudang }} / {{ r.nama_rak }} / {{ t.nama_toples }}</option>
+                                {% endfor %}
+                            {% endfor %}
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="map-group">
+                    <label>Nama Barang</label>
+                    <select name="map_nama">
+                        {% for h in headers %}
+                        <option value="{{ h }}" {{ 'selected' if 'product_name' in h.lower() }}>{{ h }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="map-group">
+                    <label>Kode Barang (SKU)</label>
+                    <select name="map_sku">
+                        {% for h in headers %}
+                        <option value="{{ h }}" {{ 'selected' if 'sku' in h.lower() }}>{{ h }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="map-group">
+                    <label>Link Gambar</label>
+                    <select name="map_foto">
+                        {% for h in headers %}
+                        <option value="{{ h }}" {{ 'selected' if 'cover_image' in h.lower() }}>{{ h }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <button type="submit" class="btn-primary" style="width: 100%; margin-top: 20px; padding: 15px; background: #10b981;">
+                    <i data-lucide="check-circle"></i> Selesaikan Import
+                </button>
+            </form>
+        </div>
+    </div>
+    <script>lucide.createIcons();</script>
+</body>
+</html>

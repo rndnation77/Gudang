@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tambah Barang - Smart Warehouse</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <div class="container" style="max-width: 800px;">
+        <nav class="nav-back">
+            <a href="{{ url_for('index') }}"><i data-lucide="arrow-left"></i> Batal & Kembali</a>
+        </nav>
+
+        <div class="header-section">
+            <h1><i data-lucide="package-plus"></i> Tambah Barang Baru</h1>
+        </div>
+
+        <div class="card border-success">
+            <form action="/add_barang_inventory" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 20px;">
+                
+                <div class="form-group">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600;"><i data-lucide="info"></i> Informasi Barang</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" name="nama_barang" placeholder="Nama Barang (Misal: Baut M8)" required>
+                        <input type="text" name="kode_barang" placeholder="Kode SKU/Barcode">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600;"><i data-lucide="map-pin"></i> Tentukan Lokasi Simpan</label>
+                    <select name="toples_id" required style="width: 100%;">
+                        <option value="">-- Pilih Toples / Wadah --</option>
+                        {% for g in gudangs %}
+                            <optgroup label="🏢 Gudang: {{ g.nama_gudang }}">
+                            {% for r in g.raks %}
+                                {% for t in r.toples_list %}
+                                    <option value="{{ t.id }}">{{ r.nama_rak }} ➔ {{ t.nama_toples }}</option>
+                                {% endfor %}
+                            {% endfor %}
+                            </optgroup>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600;"><i data-lucide="camera"></i> Foto Barang</label>
+                    <div class="file-upload-area" style="border: 2px dashed var(--border); padding: 20px; border-radius: 10px; text-align: center;">
+                        <i data-lucide="upload-cloud" style="width: 40px; height: 40px; color: var(--text-muted); margin-bottom: 10px;"></i>
+                        <input type="file" name="foto" accept="image/*" style="border: none;">
+                        <p class="muted-text" style="font-size: 0.8rem; margin-top: 5px;">Format: JPG, PNG, GIF (Maks 2MB)</p>
+                    </div>
+                </div>
+
+                <div style="margin-top: 10px;">
+                    <button type="submit" class="success-bg" style="width: 100%; padding: 15px; font-size: 1rem;">
+                        <i data-lucide="save"></i> Simpan ke Inventaris
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>lucide.createIcons();</script>
+</body>
+</html>

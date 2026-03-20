@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Isi Toples: {{ toples.nama_toples }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Style cepat untuk badge status di dalam grid toples */
+        .status-dot {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-top: 5px;
+        }
+        .s-tersedia { background: #dcfce7; color: #166534; }
+        .s-hampir-habis { background: #fef9c3; color: #854d0e; }
+        .s-kosong { background: #fee2e2; color: #991b1b; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="nav-back">
+            <a href="{{ url_for('kelola_rak', rak_id=toples.rak_id) }}">
+                <i data-lucide="arrow-left"></i> Kembali ke Rak ({{ toples.rak.nama_rak }})
+            </a>
+        </nav>
+
+        <div class="header-section">
+            <div class="brand">
+                <h1><i data-lucide="container"></i> {{ toples.nama_toples }}</h1>
+                <p class="muted-text">
+                    <i data-lucide="map-pin" style="width: 14px; vertical-align: middle;"></i> 
+                    {{ toples.rak.gudang.nama_gudang }} / {{ toples.rak.nama_rak }}
+                </p>
+            </div>
+        </div>
+
+        <div class="card border-primary" style="margin-bottom: 20px;">
+            <div class="search-box-container" style="display: flex; align-items: center; gap: 10px; background: white; padding: 5px 15px; border-radius: 8px; border: 1px solid var(--border);">
+                <i data-lucide="search" style="color: var(--text-muted);"></i>
+                <input type="text" id="barangSearch" placeholder="Cari nama atau kode barang di toples ini..." 
+                       style="width: 100%; border: none; outline: none; font-size: 1rem; padding: 10px 0;" onkeyup="filterBarang()">
+            </div>
+        </div>
+
+        <div class="inventory-grid" id="barangGrid">
+            {% for b in toples.barangs %}
+            <div class="item-card barang-item">
+                <div class="action-overlay">
+                    <a href="{{ url_for('edit_barang_page', id=b.id) }}" class="edit-icon-btn" title="Edit">
+                        <i data-lucide="edit-3"></i>
+                    </a>
+                    <a href="{{ url_for('delete_barang', id=b.id) }}" class="delete-icon-btn" onclick="return confirm('Hapus barang {{ b.nama_barang }}?')" title="Hapus">
+                        <i data-lucide="trash-2"></i>
+                    </a>
+                </div>
+
+                <div class="img-container">
+                    {% if b.foto_barang %}
+                    <img src="{{ url_for('static', filename='uploads/' + b.foto_barang) }}" alt="{{ b.nama_barang }}">
+                    {% else %}
+                    <div class="no-image">
+                        <i data-lucide="image-off"></i>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="item-info">
+                    <span class="badge-code" style="font-size: 0.65rem; opacity: 0.8;">#{{ b.kode_barang if b.kode_barang else 'N/A' }}</span>
+                    <h4 class="nama-barang" style="margin: 3px 0;">{{ b.nama_barang }}</h4>
+                    
+                    <div class="status-info">
+                        {% if b.status == 'Hampir Habis' %}
+                            <span class="status-dot s-hampir-habis">● Hampir Habis</span>
+                        {% elif b.status == 'Kosong' %}
+                            <span class="status-dot s-kosong">● Kosong</span>
+                        {% else %}
+                            <span class="status-dot s-tersedia">● Tersedia</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="card" style="grid-column: 1/-1; text-align: center; padding: 60px; opacity: 0.6; border: 2px dashed var(--border); background: transparent;">
+                <i data-lucide="package-open" style="width: 48px; height: 48px; margin-bottom: 15px;"></i>
+                <p>Toples ini masih kosong.</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div id="noResult" class="card" style="display: none; text-align: center; padding: 40px; margin-top: 20px;">
+            <i data-lucide="search-x" style="width: 40px; height: 40px; margin-bottom: 10px; opacity: 0.3;"></i>
+            <p class="muted-text">Barang tidak ditemukan di toples ini.</p>
+        </div>
+    </div>
+
+    <script>
+    function filterBarang() {
+        let input = document.getElementById('barangSearch').value.toLowerCase();
+        let cards = document.getElementsByClassName('barang-item');
+        let hasResult = false;
+        let grid = document.getElementById('barangGrid');
+
+        for (let i = 0; i < cards.length; i++) {
+            let name = cards[i].querySelector('.nama-barang').innerText.toLowerCase();
+            let code = cards[i].querySelector('.badge-code').innerText.toLowerCase();
+            
+            if (name.includes(input) || code.includes(input)) {
+                cards[i].style.display = "";
+                hasResult = true;
+            } else {
+                cards[i].style.display = "none";
+            }
+        }
+
+        grid.style.display = hasResult ? "grid" : "none";
+        document.getElementById('noResult').style.display = hasResult ? "none" : "block";
+    }
+
+    lucide.createIcons();
+    </script>
+</body>
+</html>

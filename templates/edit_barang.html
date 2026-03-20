@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Barang - Smart Warehouse</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .form-group { display: flex; flex-direction: column; gap: 5px; }
+        label { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); }
+        .select-status { padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-weight: 600; }
+    </style>
+</head>
+<body>
+    <div class="container" style="max-width: 600px;">
+        <nav class="nav-back">
+            <a href="{{ url_for('index') }}"><i data-lucide="arrow-left"></i> Batal & Kembali</a>
+        </nav>
+
+        <div class="card border-primary">
+            <h3><i data-lucide="edit"></i> Edit Barang: {{ b.nama_barang }}</h3>
+            <form action="{{ url_for('update_barang', id=b.id) }}" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 15px;">
+                
+                <div class="form-group">
+                    <label>Nama Barang</label>
+                    <input type="text" name="nama_barang" value="{{ b.nama_barang }}" placeholder="Contoh: Obeng Plus" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Kode Barang (SKU)</label>
+                    <input type="text" name="kode_barang" value="{{ b.kode_barang if b.kode_barang else '' }}" placeholder="Contoh: BRG-001">
+                </div>
+
+                <div class="form-group">
+                    <label>Status Ketersediaan</label>
+                    <select name="status" class="select-status">
+                        <option value="Tersedia" {{ 'selected' if b.status == 'Tersedia' }}>🟢 Tersedia (Stok Ada)</option>
+                        <option value="Hampir Habis" {{ 'selected' if b.status == 'Hampir Habis' }}>🟡 Hampir Habis (Segera Beli)</option>
+                        <option value="Kosong" {{ 'selected' if b.status == 'Kosong' }}>🔴 Kosong (Habis)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Pindah Lokasi (Rak - Toples)</label>
+                    <select name="toples_id" required>
+                        {% for g in gudangs %}
+                            <optgroup label="Gudang: {{ g.nama_gudang }}">
+                            {% for r in g.raks %}
+                                {% for t in r.toples_list %}
+                                    <option value="{{ t.id }}" {{ 'selected' if b.toples_id == t.id }}>
+                                        {{ r.nama_rak }} - {{ t.nama_toples }}
+                                    </option>
+                                {% endfor %}
+                            {% endfor %}
+                            </optgroup>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Foto Barang</label>
+                    <div class="current-photo" style="background: #f8fafc; padding: 10px; border-radius: 8px; text-align: center; border: 1px dashed var(--border);">
+                        {% if b.foto_barang %}
+                        <img src="{{ url_for('static', filename='uploads/' + b.foto_barang) }}" style="max-width: 150px; border-radius: 8px; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto;">
+                        <p style="font-size: 0.75rem; color: var(--text-muted);">Foto saat ini: {{ b.foto_barang }}</p>
+                        {% else %}
+                        <p style="font-size: 0.75rem; color: var(--text-muted);">Belum ada foto.</p>
+                        {% endif %}
+                    </div>
+                    <input type="file" name="foto" accept="image/*" style="margin-top: 10px;">
+                </div>
+                
+                <button type="submit" class="btn-primary" style="padding: 15px; font-size: 1rem;"><i data-lucide="check"></i> Simpan Perubahan</button>
+            </form>
+        </div>
+    </div>
+    <script>lucide.createIcons();</script>
+</body>
+</html>

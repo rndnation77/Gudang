@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Warehouse - Inventory</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg-body: #f8fafc;
+            --text-main: #1e293b;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-top: 8px;
+            text-transform: uppercase;
+        }
+        .status-tersedia { background: #dcfce7; color: #166534; }
+        .status-hampir-habis { background: #fef9c3; color: #854d0e; }
+        .status-kosong { background: #fee2e2; color: #991b1b; }
+        
+        .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+        .dot-green { background: #22c55e; }
+        .dot-yellow { background: #eab308; }
+        .dot-red { background: #ef4444; }
+
+        /* Revisi Style Form Filter */
+        .search-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .search-form input[name="search"] {
+            flex: 2;
+            min-width: 200px;
+        }
+
+        .search-form select {
+            flex: 1;
+            min-width: 140px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .search-form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+
+        .search-form input, .search-form select {
+            padding: 10px 14px;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            background-color: white;
+            transition: border-color 0.2s;
+        }
+
+        .search-form input:focus, .search-form select:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+
+        .btn-filter {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-filter:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-reset {
+            background: #f1f5f9;
+            color: #64748b;
+            padding: 10px 14px;
+            border-radius: 10px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-section">
+            <div class="brand">
+                <h1><i data-lucide="package-search"></i> Smart Inventory</h1>
+            </div>
+            
+            <div class="nav-buttons">
+                <a href="{{ url_for('master_data') }}" class="btn-nav btn-dark" title="Struktur Gudang">
+                    <i data-lucide="settings"></i> Master Data
+                </a>
+                <div class="nav-group">
+                    <a href="{{ url_for('tambah_barang_page') }}" class="btn-nav btn-primary">
+                        <i data-lucide="package-plus"></i> Barang
+                    </a>
+                    <a href="/kelola-semua-rak" class="btn-nav btn-indigo"><i data-lucide="layers"></i> Rak</a>
+                    <a href="/kelola-semua-toples" class="btn-nav btn-indigo"><i data-lucide="container"></i> Toples</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-primary">
+            <h3 style="margin-bottom: 15px;"><i data-lucide="filter"></i> Filter Barang & Lokasi</h3>
+            <form action="/" method="GET" class="search-form">
+                <input type="text" name="search" placeholder="Cari Nama atau SKU..." value="{{ request.args.get('search', '') }}">
+                
+                <select name="gudang_id" id="filter_gudang">
+                    <option value="">Semua Gudang</option>
+                    {% for g in gudangs %}
+                    <option value="{{ g.id }}" {{ 'selected' if request.args.get('gudang_id') == g.id|string }}>{{ g.nama_gudang }}</option>
+                    {% endfor %}
+                </select>
+                
+                <select name="rak_id" id="filter_rak">
+                    <option value="">Semua Rak</option>
+                </select>
+
+                <select name="toples_id" id="filter_toples">
+                    <option value="">Semua Toples</option>
+                </select>
+                
+                <button type="submit" class="btn-filter" title="Terapkan Filter"><i data-lucide="search"></i></button>
+                <a href="/" class="btn-reset" title="Hapus Filter"><i data-lucide="refresh-cw"></i></a>
+            </form>
+        </div>
+
+        <div class="inventory-grid">
+            {% for b in barang %}
+            <div class="item-card">
+                <div class="action-overlay">
+                    <a href="{{ url_for('edit_barang_page', id=b.id) }}" class="edit-icon-btn"><i data-lucide="edit-3"></i></a>
+                    <a href="{{ url_for('delete_barang', id=b.id) }}" class="delete-icon-btn" onclick="return confirm('Hapus {{ b.nama_barang }}?')"><i data-lucide="trash-2"></i></a>
+                </div>
+
+                <div class="img-container">
+                    {% if b.foto_barang %}
+                        {% if b.foto_barang.startswith('http') %}
+                            <img src="{{ b.foto_barang }}" alt="foto">
+                        {% else %}
+                            <img src="{{ url_for('static', filename='uploads/' + b.foto_barang) }}" alt="foto">
+                        {% endif %}
+                    {% else %}
+                        <div class="no-image"><i data-lucide="image-off"></i></div>
+                    {% endif %}
+                </div>
+
+                <div class="item-info">
+                    <span class="badge-code">
+                        <i data-lucide="hash" style="width: 12px;"></i> {{ b.kode_barang if b.kode_barang else 'TANPA SKU' }}
+                    </span>
+                    <h4 style="margin: 8px 0;">{{ b.nama_barang }}</h4>
+                    
+                    {% if b.status == 'Hampir Habis' %}
+                        <div class="status-badge status-hampir-habis"><span class="dot dot-yellow"></span> Hampir Habis</div>
+                    {% elif b.status == 'Kosong' %}
+                        <div class="status-badge status-kosong"><span class="dot dot-red"></span> Habis / Kosong</div>
+                    {% else %}
+                        <div class="status-badge status-tersedia"><span class="dot dot-green"></span> Tersedia</div>
+                    {% endif %}
+                    
+                    <hr style="margin: 15px 0; border: 0; border-top: 1px solid #f1f5f9;">
+
+                    <div class="location-path">
+                        <i data-lucide="map-pin" style="width: 14px; color: var(--primary);"></i>
+                        <span title="Gudang">{{ b.toples.rak.gudang.nama_gudang }}</span>
+                        <i data-lucide="chevron-right" class="path-sep"></i>
+                        <span title="Rak">{{ b.toples.rak.nama_rak }}</span>
+                        <i data-lucide="chevron-right" class="path-sep"></i>
+                        <span class="final-path">{{ b.toples.nama_toples }}</span>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="card" style="grid-column: 1/-1; text-align: center; padding: 60px 20px;">
+                <i data-lucide="package" style="width: 50px; height: 50px; margin-bottom: 15px; opacity: 0.2;"></i>
+                <p style="color: #64748b;">Data barang tidak ditemukan. Silahkan tambahkan barang atau sesuaikan filter.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        // Ambil data JSON dari Flask
+        const dataGudang = {{ gudangs_json | safe }};
+        
+        const selectGudang = document.getElementById('filter_gudang');
+        const selectRak = document.getElementById('filter_rak');
+        const selectToples = document.getElementById('filter_toples');
+
+        // Parameter URL untuk mempertahankan state pilihan
+        const currentRakId = "{{ request.args.get('rak_id', '') }}";
+        const currentToplesId = "{{ request.args.get('toples_id', '') }}";
+
+        function updateRak(isInitial = false) {
+            const gudangId = selectGudang.value;
+            selectRak.innerHTML = '<option value="">Semua Rak</option>';
+            selectToples.innerHTML = '<option value="">Semua Toples</option>';
+            
+            if (gudangId) {
+                const gudang = dataGudang.find(g => g.id == gudangId);
+                if (gudang && gudang.raks) {
+                    gudang.raks.forEach(rak => {
+                        const isSelected = (isInitial && rak.id == currentRakId) ? 'selected' : '';
+                        selectRak.innerHTML += `<option value="${rak.id}" ${isSelected}>${rak.nama_rak}</option>`;
+                    });
+                }
+            }
+            if (isInitial && currentRakId) updateToples(true);
+        }
+
+        function updateToples(isInitial = false) {
+            const gudangId = selectGudang.value;
+            const rakId = selectRak.value;
+            selectToples.innerHTML = '<option value="">Semua Toples</option>';
+            
+            if (rakId) {
+                const gudang = dataGudang.find(g => g.id == gudangId);
+                const rak = gudang.raks.find(r => r.id == rakId);
+                if (rak && rak.toples_list) {
+                    rak.toples_list.forEach(t => {
+                        const isSelected = (isInitial && t.id == currentToplesId) ? 'selected' : '';
+                        selectToples.innerHTML += `<option value="${t.id}" ${isSelected}>${t.nama_toples}</option>`;
+                    });
+                }
+            }
+        }
+
+        selectGudang.addEventListener('change', () => updateRak(false));
+        selectRak.addEventListener('change', () => updateToples(false));
+
+        window.onload = () => {
+            lucide.createIcons();
+            // Jalankan update awal jika ada parameter di URL
+            if (selectGudang.value) {
+                updateRak(true);
+            }
+        };
+    </script>
+</body>
+</html>

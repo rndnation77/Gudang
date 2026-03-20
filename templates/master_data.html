@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Data - Smart Warehouse</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Tambahan Style Khusus untuk Tombol Shopee & Layout */
+        .import-banner {
+            background: linear-gradient(135deg, #ee4d2d 0%, #ff7337 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(238, 77, 45, 0.2);
+        }
+        .import-banner h3 { color: white; margin: 0; }
+        .btn-white {
+            background: white;
+            color: #ee4d2d;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.2s;
+        }
+        .btn-white:hover { transform: scale(1.05); }
+        .main-wrapper { display: flex; gap: 20px; align-items: flex-start; }
+        .content { flex: 1; }
+        .sidebar { width: 300px; position: sticky; top: 20px; }
+        .shelf-form-bg { border: 1px dashed #cbd5e1; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="main-wrapper">
+        <div class="content">
+            <div class="header-section">
+                <div class="nav-back">
+                    <a href="{{ url_for('index') }}"><i data-lucide="arrow-left"></i> Kembali ke Dashboard</a>
+                </div>
+                <h1><i data-lucide="settings-2"></i> Pengaturan Gudang</h1>
+            </div>
+
+            <div class="import-banner">
+                <div>
+                    <h3><i data-lucide="shopping-bag"></i> Shopee Bulk Importer</h3>
+                    <p style="font-size: 0.9rem; opacity: 0.9; margin: 5px 0 0 0;">Upload CSV Shopee untuk tambah barang otomatis beserta link gambar.</p>
+                </div>
+                <a href="{{ url_for('shopee_upload_page') }}" class="btn-white">
+                    <i data-lucide="upload-cloud"></i> Import Excel
+                </a>
+            </div>
+
+            <div class="card border-primary">
+                <h3><i data-lucide="plus-circle"></i> Buat Gudang Baru</h3>
+                <form action="/add_gudang" method="POST">
+                    <input type="text" name="nama_gudang" placeholder="Nama Gudang (Gudang A, Gudang Sparepart, dll)" required>
+                    <button type="submit" class="btn-primary"><i data-lucide="save"></i> Simpan Gudang</button>
+                </form>
+            </div>
+
+            {% for g in gudangs %}
+            <div class="card" style="margin-top: 30px;">
+                <div class="card-header">
+                    <h2><i data-lucide="warehouse"></i> {{ g.nama_gudang }}</h2>
+                </div>
+                
+                <form action="/add_rak/{{ g.id }}" method="POST" class="shelf-form-bg" style="background: #f8fafc; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" name="nama_rak" placeholder="Nama Rak (Rak 01)" required style="flex: 2;">
+                        <input type="text" name="kode_rak" placeholder="Kode (RAK-A)" style="flex: 1;">
+                        <button type="submit" class="btn-dark"><i data-lucide="plus"></i> Rak</button>
+                    </div>
+                </form>
+
+                {% for r in g.raks %}
+                <div class="shelf-box" style="border: 1px solid #e2e8f0; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <div>
+                            <strong><i data-lucide="layers"></i> {{ r.nama_rak }} 
+                                <span class="badge-code" style="font-size: 0.7rem; background: #e2e8f0;">{{ r.kode_rak if r.kode_rak else 'No Kode' }}</span>
+                            </strong>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <a href="{{ url_for('edit_rak_page', id=r.id) }}" title="Edit Rak" style="color: var(--primary);"><i data-lucide="edit-3" style="width: 18px;"></i></a>
+                            <a href="{{ url_for('delete_rak', id=r.id) }}" title="Hapus Rak" style="color: var(--danger);" onclick="return confirm('Hapus rak {{ r.nama_rak }}?')"><i data-lucide="trash-2" style="width: 18px;"></i></a>
+                        </div>
+                    </div>
+                    
+                    <form action="/add_toples/{{ r.id }}" method="POST" style="margin-bottom: 15px; display: flex; gap: 8px;">
+                        <input type="text" name="nama_toples" placeholder="Nama Toples/Box" required style="flex: 1; padding: 5px 10px;">
+                        <button type="submit" class="btn-success-outline" style="white-space: nowrap;"><i data-lucide="plus-square"></i> + Toples</button>
+                    </form>
+
+                    <div class="jar-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px;">
+                        {% for t in r.toples_list %}
+                        <div class="jar-item" style="position: relative; padding: 10px; border: 1px solid #f1f5f9; text-align: center; border-radius: 8px; background: white;">
+                            <div style="position: absolute; top: 2px; right: 2px; display: flex; gap: 2px;">
+                                <a href="{{ url_for('edit_toples_page', id=t.id) }}" style="color: var(--primary);"><i data-lucide="edit-2" style="width: 12px;"></i></a>
+                                <a href="/delete_toples/{{ t.id }}" style="color: var(--danger);" onclick="return confirm('Hapus toples ini?')"><i data-lucide="x-circle" style="width: 12px;"></i></a>
+                            </div>
+
+                            <i data-lucide="container" style="color: var(--primary); width: 20px;"></i>
+                            <div style="font-weight: 600; font-size: 0.8rem; margin-top: 5px; color: var(--text-dark);">{{ t.nama_toples }}</div>
+                            <div class="muted-text" style="font-size: 0.65rem;">{{ t.barangs|length }} Barang</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="sidebar">
+            <div class="card">
+                <h3><i data-lucide="activity"></i> Log Aktivitas</h3>
+                <hr style="margin: 15px 0; border: 0; border-top: 1px solid var(--border); opacity: 0.1;">
+                <div class="log-container">
+                    {% for log in logs %}
+                    <div class="log-item" style="margin-bottom: 12px; border-left: 3px solid var(--primary); padding-left: 10px;">
+                        <span class="log-time" style="font-size: 0.7rem; color: var(--text-muted);">
+                            <i data-lucide="clock" style="width: 10px;"></i> {{ log.waktu.strftime('%H:%M') }}
+                        </span>
+                        <p style="font-size: 0.85rem; margin: 3px 0; line-height: 1.4;">{{ log.acara }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>lucide.createIcons();</script>
+</body>
+</html>

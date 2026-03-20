@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Semua Rak - Smart Warehouse</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <div class="container">
+        <nav class="nav-back">
+            <a href="{{ url_for('index') }}"><i data-lucide="arrow-left"></i> Kembali ke Dashboard</a>
+        </nav>
+
+        <div class="header-section">
+            <h1><i data-lucide="layers"></i> Manajemen Semua Rak</h1>
+        </div>
+
+        <div class="card">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Nama Rak</th>
+                        <th>Kode</th>
+                        <th>Lokasi Gudang</th>
+                        <th>Jumlah Wadah</th>
+                        <th style="text-align: center;">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in raks %}
+                    <tr>
+                        <td><strong>{{ r.nama_rak }}</strong></td>
+                        <td><span class="badge-code">{{ r.kode_rak if r.kode_rak else '-' }}</span></td>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <i data-lucide="warehouse" style="width:14px; color: var(--secondary);"></i>
+                                {{ r.gudang.nama_gudang }}
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge-count">{{ r.toples_list|length }} Wadah</span>
+                        </td>
+                        <td>
+                            <div style="display: flex; gap: 10px; justify-content: center; align-items: center;">
+                                
+                                <a href="{{ url_for('kelola_rak', rak_id=r.id) }}" 
+                                   class="btn-icon btn-primary-small" 
+                                   title="Buka Isi Rak">
+                                    <i data-lucide="external-link" style="color: white;"></i>
+                                </a>
+                                
+                                <a href="{{ url_for('edit_rak_page', id=r.id) }}" 
+                                   class="btn-icon" 
+                                   style="background-color: var(--warning);" 
+                                   title="Edit Nama/Lokasi">
+                                    <i data-lucide="edit-3" style="color: white;"></i>
+                                </a>
+
+                                <a href="/delete_rak/{{ r.id }}" 
+                                   class="btn-icon" 
+                                   style="background-color: var(--danger);" 
+                                   onclick="return confirm('Hapus rak {{ r.nama_rak }}? Semua toples di dalamnya akan ikut terhapus!')"
+                                   title="Hapus Rak">
+                                    <i data-lucide="trash-2" style="color: white;"></i>
+                                </a>
+
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>
